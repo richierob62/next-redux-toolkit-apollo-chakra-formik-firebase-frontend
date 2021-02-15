@@ -9,8 +9,6 @@ import { verifyIdToken } from '../firebaseAdmin';
 const Authenticated = (props: any) => {
   firebaseClient();
 
-  console.log(props);
-
   if (props.email) {
     return (
       <Flex>
@@ -26,7 +24,7 @@ const Authenticated = (props: any) => {
                     ? JSON.stringify(props[ele], null, 2)
                     : props[ele];
 
-                return <Text>{`${ele}: ${data}`}</Text>;
+                return <Text key={ele}>{`${ele}: ${data}`}</Text>;
               })}
             </Stack>
           </Box>
