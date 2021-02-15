@@ -12,6 +12,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import firebase from 'firebase/app';
 import firebaseClient from '../firebaseClient';
 import { useState } from 'react';
@@ -106,6 +107,7 @@ const Login = () => {
             Login
           </Button>
         </Stack>
+        <GoogleSignInButton />
       </Stack>
     </Flex>
   );
