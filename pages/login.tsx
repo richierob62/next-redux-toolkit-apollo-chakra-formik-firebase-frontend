@@ -53,7 +53,7 @@ const Login = () => {
 
         <Stack justifyContent="center" isInline spacing={10}>
           <Button
-            minWidth="40%"
+            size="lg"
             variant="solid"
             colorScheme="blue"
             isDisabled={isDisabled}
@@ -80,7 +80,7 @@ const Login = () => {
           </Button>
 
           <Button
-            minWidth="40%"
+            size="lg"
             variant="solid"
             colorScheme="blue"
             isDisabled={isDisabled}

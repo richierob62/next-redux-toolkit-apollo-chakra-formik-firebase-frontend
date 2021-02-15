@@ -10,7 +10,18 @@ const DisableableLink = (props) => {
         <Text>{label}</Text>
       ) : (
         <Link href={href}>
-          <a>{label}</a>
+          <a
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {label}
+          </a>
         </Link>
       )}
     </>
