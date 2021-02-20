@@ -1,6 +1,6 @@
 import admin, { ServiceAccount } from 'firebase-admin';
 
-import serviceAccount from './auth-secrets.json';
+import serviceAccount from './auth-secrets';
 
 export const verifyIdToken = (token: string) => {
   if (!admin.apps.length) {
