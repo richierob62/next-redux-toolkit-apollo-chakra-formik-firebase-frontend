@@ -55,9 +55,9 @@ const Login = () => {
 
         <Stack justifyContent="center" isInline spacing={10}>
           <Button
-            size="lg"
+            size="md"
             variant="solid"
-            colorScheme="blue"
+            colorScheme="green"
             isDisabled={isDisabled}
             onClick={async () => {
               await firebase
@@ -82,7 +82,7 @@ const Login = () => {
           </Button>
 
           <Button
-            size="lg"
+            size="md"
             variant="solid"
             colorScheme="blue"
             isDisabled={isDisabled}
@@ -106,6 +106,41 @@ const Login = () => {
             }}
           >
             Login
+          </Button>
+
+          <Button
+            size="md"
+            variant="solid"
+            colorScheme="red"
+            isDisabled={!email}
+            onClick={async () => {
+              await firebase
+                .auth()
+                .sendPasswordResetEmail(email)
+                .then(() => {
+                  toast({
+                    title: 'Email Sent',
+                    description: 'Check your email for a password reset link',
+                    status: 'info',
+                    duration: 6000,
+                    isClosable: true,
+                  });
+
+                  // window.location.href = '/';
+                })
+                .catch((err) => {
+                  const { message } = err;
+                  toast({
+                    title: 'An error occurred',
+                    description: message,
+                    status: 'error',
+                    duration: 6000,
+                    isClosable: true,
+                  });
+                });
+            }}
+          >
+            Reset Password
           </Button>
         </Stack>
         <GoogleSignInButton />
