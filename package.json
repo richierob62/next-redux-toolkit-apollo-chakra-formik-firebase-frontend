@@ -5,7 +5,8 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "scaffold": "mst-gql --format ts http://localhost:3001/graphql"
   },
   "license": "MIT",
   "dependencies": {
@@ -15,6 +16,11 @@
     "firebase": "^8.2.7",
     "firebase-admin": "^9.5.0",
     "framer-motion": "^3.3.0",
+    "graphql-request": "^3.4.0",
+    "mobx": "^6.1.8",
+    "mobx-react": "^7.1.0",
+    "mobx-state-tree": "^5.0.1",
+    "mst-gql": "^0.13.0",
     "mysql": "^2.18.1",
     "next": "^10.0.6",
     "nookies": "^2.5.2",
