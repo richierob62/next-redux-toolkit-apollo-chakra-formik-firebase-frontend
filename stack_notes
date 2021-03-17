@@ -1,0 +1,180 @@
+codegen.yml
+npm install -D @graphql-codegen/cli
+npm install -D @graphql-codegen/typescript
+{
+  "scripts": {
+    "generate": "graphql-codegen"
+  }
+}
+npx graphql-codegen init
+
+====================================================================================
+my-service.ts
+import ApolloClient, { gql } from 'apollo-boost';
+
+const client = new ApolloClient({
+  uri: 'https://api.github.com/graphql',
+  fetchOptions: {
+    credentials: 'include'
+  },
+  request: (operation) => {
+    operation.setContext({
+      headers: {
+        authorization: `Bearer ${githubToken}`
+      }
+    });
+  },
+  onError: ({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) return console.error('GrahQL Errors:', graphQLErrors);
+    if (networkError) return console.error('Network Error: ', networkError);
+  }
+});
+
+export { client, gql };
+
+
+
+====================================================================================
+some-query.ts
+import { gql } from '../services/my-service';
+export const someNamedQuery = gql`
+  query {
+   ... body of query
+  }
+`;
+====================================================================================
+store.ts
+import { client } from '../services/my-service';
+import { someNamedQuery } from '../queries/some-query';
+
+export type IStore = Instance<typeof MyStore>
+
+const MyStore = types
+  .model('MyStore', {
+    property: types.something,
+  .views(self => ({
+    get someCalculatedValue() {}
+  }))
+  .preProcessSnapshot(snapshot => ({
+    done: snapshot.done === "true" ? true : snapshot.done === "false" ? false : snapshot.done
+  }))
+  .postProcessSnapshot(snapshot => ({
+    ...
+  }))
+  .actions(self => {
+    const someAsyncCall = flow(function* () {
+      const { data, loading, error } = yield client.query({
+        query: someNamedQuery,
+        fetchPolicy: 'network-only'
+      });
+      ... do updates to model here
+    });
+
+    afterCreate() {
+      ...
+    }
+ 
+    afterAttach() {
+      ...
+    }
+ 
+    beforeDestroy() {
+      ...
+    }
+
+    return { someAsyncCall };
+  });
+
+let startupValues = {
+  ...initial values
+}
+
+const data = localStorage.getItem('rootState');
+if (data) {
+  const json = JSON.parse(data);
+  if (MyStore.is(json)) {
+    startupValues = json
+  }
+}
+
+let store: IStore | undefined
+
+export function initializeStore(snapshot = null) {
+  const _store = store ?? MyStore.create(startupValues)
+
+  onSnapshot(_store, snapshot => {
+    localStorage.setItem('rootState', JSON.stringify(snapshot));
+  });
+
+  if (snapshot) {
+    applySnapshot(_store, snapshot)
+  }
+  if (typeof window === 'undefined') return _store // always create a new store from server
+  if (!store) store = _store
+
+  return store
+}
+
+export function useStore(initialState: any) {
+  const store = useMemo(() => initializeStore(initialState), [initialState])
+
+  return store
+}
+
+====================================================================================
+_app.tsx
+import { Provider } from 'mobx-react'
+import { useStore } from '../store'
+
+export default function App({ Component, pageProps }) {
+  const store = useStore(pageProps.initialState)
+
+  return (
+    <Provider store={store}>
+      <Component {...pageProps} />
+    </Provider>
+  )
+}
+====================================================================================
+my_page.tsx
+import { getSnapshot } from 'mobx-state-tree'
+import MyComponent from '../components/MyComponent'
+import { initializeStore } from '../store'
+
+export default function MyPage() {
+  return <MyComponent />
+}
+
+export function getServerSideProps() {
+  const store = initializeStore()
+
+  store.someAsyncCall()
+
+  return { props: { initialState: getSnapshot(store) } }
+}
+====================================================================================
+my-component.tsx
+import { inject, observer } from 'mobx-react';
+
+interface MyProps {
+  store?: IStore
+  ..other props
+}
+
+const MyComponent: React.FC<MyProps>  = observer((props) => {
+
+  const {someModelValue, someModelAction, someModelCleanupAction} = useStore('')
+
+  useEffect(() => {
+    someModelAction()
+    return () => {
+      someModelCleanupAction()
+    }
+  }, [someModelAction, someModelCleanupAction])
+
+  return <div>{someModelValue}</div>
+})
+
+export default MyComponent
+====================================================================================
+

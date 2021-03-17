@@ -35,6 +35,8 @@ export const PostModelBase = withTypedRefs<Refs>()(ModelBase
     user: types.union(types.undefined, types.late((): any => UserModel)),
     comments: types.union(types.undefined, types.array(MSTGQLRef(types.late((): any => CommentModel)))),
     votes: types.union(types.undefined, types.array(MSTGQLRef(types.late((): any => VoteModel)))),
+    createdAt: types.union(types.undefined, types.frozen()),
+    updatedAt: types.union(types.undefined, types.frozen()),
     numVotes: types.union(types.undefined, types.number),
   })
   .views(self => ({
@@ -47,6 +49,8 @@ export class PostModelSelector extends QueryBuilder {
   get id() { return this.__attr(`id`) }
   get title() { return this.__attr(`title`) }
   get body() { return this.__attr(`body`) }
+  get createdAt() { return this.__attr(`createdAt`) }
+  get updatedAt() { return this.__attr(`updatedAt`) }
   get numVotes() { return this.__attr(`numVotes`) }
   user(builder?: string | UserModelSelector | ((selector: UserModelSelector) => UserModelSelector)) { return this.__child(`user`, UserModelSelector, builder) }
   comments(builder?: string | CommentModelSelector | ((selector: CommentModelSelector) => CommentModelSelector)) { return this.__child(`comments`, CommentModelSelector, builder) }
@@ -56,4 +60,4 @@ export function selectFromPost() {
   return new PostModelSelector()
 }
 
-export const postModelPrimitives = selectFromPost().title.body.numVotes
+export const postModelPrimitives = selectFromPost().title.body.createdAt.updatedAt.numVotes

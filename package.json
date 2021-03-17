@@ -20,6 +20,7 @@
     "mobx": "^6.1.8",
     "mobx-react": "^7.1.0",
     "mobx-state-tree": "^5.0.1",
+    "momentjs": "^2.0.0",
     "mst-gql": "^0.13.0",
     "mysql": "^2.18.1",
     "next": "^10.0.6",
