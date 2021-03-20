@@ -5,10 +5,16 @@ import { NextPageContext } from 'next';
 import React from 'react';
 import firebase from 'firebase/app';
 import firebaseClient from '../firebaseClient';
+import { getSnapshot } from 'mobx-state-tree';
+import { initializeStore } from '../store';
 import nookies from 'nookies';
 import { verifyIdToken } from '../firebaseAdmin';
 
 const Authenticated = (props: any) => {
+  console.log('======================');
+  console.log(props);
+  console.log('======================');
+
   firebaseClient();
 
   return (
@@ -39,9 +45,13 @@ export async function getServerSideProps(context: Partial<NextPageContext>) {
   try {
     const cookies = nookies.get(context);
     const token = await verifyIdToken(cookies.token);
+    const store = initializeStore();
+    await store.getPosts();
+
     return {
       props: {
         ...token,
+        ...getSnapshot(store),
       },
     };
   } catch (err) {

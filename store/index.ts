@@ -1,32 +1,111 @@
-import { Instance, applySnapshot, onSnapshot, types } from 'mobx-state-tree';
+import {
+  Instance,
+  applySnapshot,
+  flow,
+  onSnapshot,
+  types,
+} from 'mobx-state-tree';
 
-import { Post } from '../generated/apolloComponents'
-
-import { client } from '../services/my-service';
-import { flow } from 'mobx';
-import { model } from 'mobx-state-tree/dist/internal';
-import { someNamedQuery } from '../queries/some-query';
+import { allPosts } from '../graphql/posts/all_posts';
+import { client } from '../services';
 import { useMemo } from 'react';
 
 export type IStore = Instance<typeof MyStore>;
 
+const User = types.model({
+  __typename: 'User',
+  id: types.identifier,
+  email: types.string,
+  email_verified: types.boolean,
+  name: types.maybeNull(types.string),
+  firstName: types.maybeNull(types.string),
+  lastName: types.maybeNull(types.string),
+  fullName: types.maybeNull(types.string),
+  posts: types.array(types.late((): any => Post)),
+  votes: types.array(types.late((): any => Vote)),
+  comments: types.array(types.late((): any => Comment)),
+});
+
+const Post = types.model({
+  __typename: 'Post',
+  id: types.identifier,
+  title: types.string,
+  body: types.string,
+  user: types.late((): any => User),
+  comments: types.array(types.late((): any => Comment)),
+  votes: types.array(types.late((): any => Vote)),
+  createdAt: types.Date,
+  updatedAt: types.Date,
+  numVotes: types.number,
+});
+
+const Vote = types.model({
+  __typename: 'Vote',
+  id: types.identifier,
+  type: types.string,
+  post: types.union(
+    types.undefined,
+    types.null,
+    types.late((): any => Post)
+  ),
+  comment: types.union(
+    types.undefined,
+    types.null,
+    types.late((): any => Comment)
+  ),
+  user: types.late((): any => User),
+});
+
+const Comment = types.model({
+  __typename: 'Comment',
+  id: types.identifier,
+  body: types.string,
+  post: types.late((): any => Post),
+  user: types.late((): any => User),
+  votes: types.array(types.late((): any => Vote)),
+  numVotes: types.number,
+});
 
 const MyStore = types
   .model('MyStore', {
-    posts: types.array(Instance<typeof Post> ),
+    posts: types.array(Post),
+    title: types.string,
   })
   .views((self) => ({}))
-  .actions((self) => {});
+  .actions((self) => {
+    const setTitle = (newTitle: string) => {
+      self.title = newTitle;
+    };
+
+    const getPosts = flow(function* () {
+      const { data } = yield client.query({
+        query: allPosts,
+        fetchPolicy: 'network-only',
+      });
+
+      if (data) {
+        // self.posts.push(...data.allPosts);
+      }
+    });
+
+    return {
+      setTitle,
+      getPosts,
+    };
+  });
 
 let startupValues = {
   posts: [],
+  title: '',
 };
 
-const data = localStorage.getItem('rootState');
-if (data) {
-  const json = JSON.parse(data);
-  if (MyStore.is(json)) {
-    startupValues = json;
+if (process.browser) {
+  const data = localStorage.getItem('rootState');
+  if (data) {
+    const json = JSON.parse(data);
+    if (MyStore.is(json)) {
+      startupValues = json as any;
+    }
   }
 }
 
@@ -36,7 +115,9 @@ export function initializeStore(snapshot = null) {
   const _store = store ?? MyStore.create(startupValues);
 
   onSnapshot(_store, (snapshot) => {
-    localStorage.setItem('rootState', JSON.stringify(snapshot));
+    if (process.browser) {
+      localStorage.setItem('rootState', JSON.stringify(snapshot));
+    }
   });
 
   if (snapshot) {
