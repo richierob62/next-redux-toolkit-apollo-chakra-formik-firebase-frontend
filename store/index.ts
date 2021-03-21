@@ -6,7 +6,6 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { Post as GQLPost } from '../generated/apolloComponents';
 import { allPosts } from '../graphql/posts/all_posts';
 import { client } from '../services';
 import { useMemo } from 'react';
@@ -35,10 +34,12 @@ const Post = types.model({
   user: types.late((): any => User),
   comments: types.array(types.late((): any => Comment)),
   votes: types.maybeNull(types.array(types.late((): any => Vote))),
-  createdAt: types.Date,
-  updatedAt: types.Date,
+  createdAt: types.string,
+  updatedAt: types.string,
   numVotes: types.number,
 });
+
+export interface IPost extends Instance<typeof Post> {}
 
 const Vote = types.model({
   __typename: 'Vote',
@@ -80,21 +81,7 @@ const MyStore = types
       });
 
       if (data) {
-        const convertedPosts = data.allPosts.map((p: GQLPost) => {
-          return Post.create({
-            __typename: 'Post',
-            id: p.id,
-            title: p.title,
-            body: p.body,
-            user: p.user,
-            comments: p.comments,
-            createdAt: new Date(p.createdAt),
-            updatedAt: new Date(p.updatedAt),
-            numVotes: p.numVotes,
-          });
-        });
-
-        self.posts = convertedPosts;
+        self.posts = data.allPosts;
       }
     });
 

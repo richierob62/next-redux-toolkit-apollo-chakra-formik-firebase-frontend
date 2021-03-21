@@ -11,10 +11,6 @@ import nookies from 'nookies';
 import { verifyIdToken } from '../firebaseAdmin';
 
 const Authenticated = (props: any) => {
-  console.log('======================');
-  console.log(props);
-  console.log('======================');
-
   firebaseClient();
 
   return (
@@ -22,7 +18,7 @@ const Authenticated = (props: any) => {
       <Heading as="h2" size="lg" width="100%" textAlign="center">
         All Posts
       </Heading>
-      <AllPosts />
+      <AllPosts posts={props.posts} />
 
       <Button
         w="100%"

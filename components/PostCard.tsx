@@ -8,11 +8,11 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 
+import { IPost } from '../store';
 import Image from 'next/image';
-import { PostModelType } from '../src/models';
 import moment from 'moment';
 
-const PostCard = ({ post }: { post: PostModelType }) => {
+const PostCard = ({ post }: { post: IPost }) => {
   return (
     <Center py={6}>
       <Box
