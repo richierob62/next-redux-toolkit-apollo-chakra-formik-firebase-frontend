@@ -6,6 +6,7 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import { Post as GQLPost } from '../generated/apolloComponents';
 import { allPosts } from '../graphql/posts/all_posts';
 import { client } from '../services';
 import { useMemo } from 'react';
@@ -21,9 +22,9 @@ const User = types.model({
   firstName: types.maybeNull(types.string),
   lastName: types.maybeNull(types.string),
   fullName: types.maybeNull(types.string),
-  posts: types.array(types.late((): any => Post)),
-  votes: types.array(types.late((): any => Vote)),
-  comments: types.array(types.late((): any => Comment)),
+  posts: types.maybeNull(types.array(types.late((): any => Post))),
+  votes: types.maybeNull(types.array(types.late((): any => Vote))),
+  comments: types.maybeNull(types.array(types.late((): any => Comment))),
 });
 
 const Post = types.model({
@@ -33,7 +34,7 @@ const Post = types.model({
   body: types.string,
   user: types.late((): any => User),
   comments: types.array(types.late((): any => Comment)),
-  votes: types.array(types.late((): any => Vote)),
+  votes: types.maybeNull(types.array(types.late((): any => Vote))),
   createdAt: types.Date,
   updatedAt: types.Date,
   numVotes: types.number,
@@ -60,23 +61,18 @@ const Comment = types.model({
   __typename: 'Comment',
   id: types.identifier,
   body: types.string,
-  post: types.late((): any => Post),
-  user: types.late((): any => User),
-  votes: types.array(types.late((): any => Vote)),
+  post: types.maybeNull(types.late((): any => Post)),
+  user: types.maybeNull(types.late((): any => User)),
+  votes: types.maybeNull(types.array(types.late((): any => Vote))),
   numVotes: types.number,
 });
 
 const MyStore = types
   .model('MyStore', {
     posts: types.array(Post),
-    title: types.string,
   })
   .views((self) => ({}))
   .actions((self) => {
-    const setTitle = (newTitle: string) => {
-      self.title = newTitle;
-    };
-
     const getPosts = flow(function* () {
       const { data } = yield client.query({
         query: allPosts,
@@ -84,12 +80,25 @@ const MyStore = types
       });
 
       if (data) {
-        // self.posts.push(...data.allPosts);
+        const convertedPosts = data.allPosts.map((p: GQLPost) => {
+          return Post.create({
+            __typename: 'Post',
+            id: p.id,
+            title: p.title,
+            body: p.body,
+            user: p.user,
+            comments: p.comments,
+            createdAt: new Date(p.createdAt),
+            updatedAt: new Date(p.updatedAt),
+            numVotes: p.numVotes,
+          });
+        });
+
+        self.posts = convertedPosts;
       }
     });
 
     return {
-      setTitle,
       getPosts,
     };
   });

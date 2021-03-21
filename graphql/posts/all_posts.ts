@@ -5,8 +5,15 @@ export const allPosts = gql`
     allPosts {
       id
       title
+      body
       user {
         id
+        email
+        email_verified
+        name
+        firstName
+        lastName
+        fullName
       }
       comments {
         id
@@ -14,6 +21,8 @@ export const allPosts = gql`
         numVotes
       }
       numVotes
+      createdAt
+      updatedAt
     }
   }
 `;

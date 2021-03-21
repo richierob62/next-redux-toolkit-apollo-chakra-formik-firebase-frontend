@@ -210,10 +210,10 @@ export type AllPostsQuery = (
   { __typename?: 'Query' }
   & { allPosts: Array<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'title' | 'numVotes'>
+    & Pick<Post, 'id' | 'title' | 'body' | 'numVotes' | 'createdAt' | 'updatedAt'>
     & { user: (
       { __typename?: 'User' }
-      & Pick<User, 'id'>
+      & Pick<User, 'id' | 'email' | 'email_verified' | 'name' | 'firstName' | 'lastName' | 'fullName'>
     ), comments: Array<(
       { __typename?: 'Comment' }
       & Pick<Comment, 'id' | 'body' | 'numVotes'>
@@ -227,8 +227,15 @@ export const AllPostsDocument = gql`
   allPosts {
     id
     title
+    body
     user {
       id
+      email
+      email_verified
+      name
+      firstName
+      lastName
+      fullName
     }
     comments {
       id
@@ -236,6 +243,8 @@ export const AllPostsDocument = gql`
       numVotes
     }
     numVotes
+    createdAt
+    updatedAt
   }
 }
     `;
