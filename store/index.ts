@@ -5,76 +5,31 @@ import {
   onSnapshot,
   types,
 } from 'mobx-state-tree';
+import { createMachine, machineConfig } from './state_machine';
 
+import Post from './post';
 import { allPosts } from '../graphql/posts/all_posts';
 import { client } from '../services';
 import { useMemo } from 'react';
 
 export type IStore = Instance<typeof MyStore>;
 
-const User = types.model({
-  __typename: 'User',
-  id: types.identifier,
-  email: types.string,
-  email_verified: types.boolean,
-  name: types.maybeNull(types.string),
-  firstName: types.maybeNull(types.string),
-  lastName: types.maybeNull(types.string),
-  fullName: types.maybeNull(types.string),
-  posts: types.maybeNull(types.array(types.late((): any => Post))),
-  votes: types.maybeNull(types.array(types.late((): any => Vote))),
-  comments: types.maybeNull(types.array(types.late((): any => Comment))),
-});
-
-const Post = types.model({
-  __typename: 'Post',
-  id: types.identifier,
-  title: types.string,
-  body: types.string,
-  user: types.late((): any => User),
-  comments: types.array(types.late((): any => Comment)),
-  votes: types.maybeNull(types.array(types.late((): any => Vote))),
-  createdAt: types.string,
-  updatedAt: types.string,
-  numVotes: types.number,
-});
-
-export interface IPost extends Instance<typeof Post> {}
-
-const Vote = types.model({
-  __typename: 'Vote',
-  id: types.identifier,
-  type: types.string,
-  post: types.union(
-    types.undefined,
-    types.null,
-    types.late((): any => Post)
-  ),
-  comment: types.union(
-    types.undefined,
-    types.null,
-    types.late((): any => Comment)
-  ),
-  user: types.late((): any => User),
-});
-
-const Comment = types.model({
-  __typename: 'Comment',
-  id: types.identifier,
-  body: types.string,
-  post: types.maybeNull(types.late((): any => Post)),
-  user: types.maybeNull(types.late((): any => User)),
-  votes: types.maybeNull(types.array(types.late((): any => Vote))),
-  numVotes: types.number,
-});
-
 const MyStore = types
   .model('MyStore', {
     posts: types.array(Post),
+    machineConfig: types.frozen(),
   })
-  .views((self) => ({}))
-  .actions((self) => {
-    const getPosts = flow(function* () {
+  .views((self: any) => ({
+    get state() {
+      return self.machineState.value;
+    },
+  }))
+  .volatile(() => ({
+    machine: undefined,
+    machineState: undefined,
+  }))
+  .actions((self: any) => ({
+    getPosts: flow(function* () {
       const { data } = yield client.query({
         query: allPosts,
         fetchPolicy: 'network-only',
@@ -83,16 +38,23 @@ const MyStore = types
       if (data) {
         self.posts = data.allPosts;
       }
-    });
-
-    return {
-      getPosts,
-    };
-  });
+    }),
+    afterCreate() {
+      self.machine = createMachine();
+      self.machine.onTransition(self.updateState);
+      self.machine.start();
+    },
+    updateState() {
+      self.machineState = self.machine.state;
+    },
+    send(val: any) {
+      self.machine.send(val);
+    },
+  }));
 
 let startupValues = {
   posts: [],
-  title: '',
+  machineConfig,
 };
 
 if (process.browser) {
