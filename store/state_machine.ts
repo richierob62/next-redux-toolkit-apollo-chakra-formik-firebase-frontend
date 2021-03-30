@@ -1,19 +1,48 @@
-import { Machine, interpret } from 'xstate';
+import { MachineConfig } from 'xstate';
 
-export const machineConfig = {
-  initial: 'Hidden',
+export const machineDefinition: MachineConfig<
+  UIContext,
+  UIStateSchema,
+  UIEvents
+> = {
+  initial: 'idle',
   states: {
-    Hidden: {
+    idle: {
       on: {
-        Toggle: { target: 'Shown' },
+        FETCH: 'pending',
       },
     },
-    Shown: {
+    pending: {
+      onEntry: 'getPosts',
       on: {
-        Toggle: { target: 'Hidden' },
+        FULFILL: 'fulfilled',
+        REJECT: 'rejected',
       },
+    },
+    rejected: {
+      onEntry: 'showErrorMessage',
+      on: {
+        FETCH: 'pending',
+      },
+    },
+    fulfilled: {
+      onEntry: 'updateData',
     },
   },
 };
 
-export const createMachine = () => interpret(Machine(machineConfig));
+export interface UIStateSchema {
+  states: {
+    idle: {};
+    pending: {};
+    rejected: {};
+    fulfilled: {};
+  };
+}
+
+export type UIEvents =
+  | { type: 'FETCH' }
+  | { type: 'FULFILL' }
+  | { type: 'REJECT' };
+
+export interface UIContext {}

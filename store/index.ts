@@ -5,11 +5,12 @@ import {
   onSnapshot,
   types,
 } from 'mobx-state-tree';
-import { createMachine, machineConfig } from './state_machine';
+import { Machine, interpret } from 'xstate';
 
 import Post from './post';
 import { allPosts } from '../graphql/posts/all_posts';
 import { client } from '../services';
+import { machineDefinition } from './state_machine';
 import { useMemo } from 'react';
 
 export type IStore = Instance<typeof MyStore>;
@@ -17,19 +18,22 @@ export type IStore = Instance<typeof MyStore>;
 const MyStore = types
   .model('MyStore', {
     posts: types.array(Post),
-    machineConfig: types.frozen(),
+    // machineDefinition: types.frozen(MachineConfig<UIContext, UIStateSchema, UIEvents>),
   })
   .views((self: any) => ({
     get state() {
-      return self.machineState.value;
+      return self.ui_state.value;
     },
   }))
-  .volatile(() => ({
-    machine: undefined,
-    machineState: undefined,
+  .volatile((self: any) => ({
+    ui_service: undefined,
+    ui_state: undefined,
+    machineDefinition,
   }))
   .actions((self: any) => ({
     getPosts: flow(function* () {
+      console.log('getPosts was called');
+
       const { data } = yield client.query({
         query: allPosts,
         fetchPolicy: 'network-only',
@@ -39,22 +43,31 @@ const MyStore = types
         self.posts = data.allPosts;
       }
     }),
+    showErrorMessage(context: any, event: any) {
+      console.log(event.message);
+    },
     afterCreate() {
-      self.machine = createMachine();
-      self.machine.onTransition(self.updateState);
-      self.machine.start();
+      const machine = Machine(machineDefinition, {
+        actions: {
+          getPosts: self.getPosts,
+          showErrorMessage: self.showErrorMessage,
+        },
+      });
+      self.ui_service = interpret(machine);
+      self.ui_service.onTransition(self.updateState);
+      self.ui_service.start();
     },
     updateState() {
-      self.machineState = self.machine.state;
+      self.ui_state = self.ui_service.state;
     },
     send(val: any) {
-      self.machine.send(val);
+      self.ui_service.send(val);
     },
   }));
 
 let startupValues = {
   posts: [],
-  machineConfig,
+  machineDefinition,
 };
 
 if (process.browser) {
@@ -85,6 +98,10 @@ export function initializeStore(snapshot = null) {
   if (!store) store = _store;
 
   return store;
+}
+
+export function getStore() {
+  return store ? store : initializeStore();
 }
 
 export function useStore(initialState: any) {

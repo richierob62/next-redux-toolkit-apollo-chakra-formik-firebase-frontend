@@ -14,7 +14,7 @@ const Authenticated = (props: any) => {
   firebaseClient();
 
   return (
-    <Box w={500} p={4} my={12} mx="auto">
+    <Box w={1000} p={4} my={12} mx="auto">
       <Heading as="h2" size="lg" width="100%" textAlign="center">
         All Posts
       </Heading>
