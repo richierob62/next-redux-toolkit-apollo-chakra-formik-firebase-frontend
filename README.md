@@ -1,8 +1,10 @@
 # NextJS and friends
 
-## Mobx State Trees (mst-gql)
+## Redux Toolkit
 
-## Chackra-UI
+## Apollo Client
+
+## Chakra-UI
 
 ## Firebase Authentication
 
