@@ -2,7 +2,7 @@ import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 
 import Container from '../components/Container';
 import DisableableLink from '../components/DisableableLink';
-import { userAuth } from '../auth';
+import { userAuth } from '../auth/auth';
 
 const IndexPage = () => {
   const { user } = userAuth();

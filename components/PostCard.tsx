@@ -9,11 +9,11 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 
-import { IPost } from '../store/post';
 import Image from 'next/image';
+import { Post } from '../generated/apolloComponents';
 import moment from 'moment';
 
-const PostCard = ({ post }: { post: IPost }) => {
+const PostCard = ({ post }: { post: Post }) => {
   return (
     <ListItem>
       <Center py={6}>

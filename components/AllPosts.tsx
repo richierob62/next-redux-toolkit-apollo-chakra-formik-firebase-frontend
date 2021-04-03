@@ -1,40 +1,28 @@
-import { Box, Flex, Spacer, UnorderedList } from '@chakra-ui/react';
+import { Box, UnorderedList } from '@chakra-ui/react';
 
-import { IPost } from '../store/post';
+import { Post } from '../generated/apolloComponents';
 import PostCard from './PostCard';
 import React from 'react';
-import { getStore } from '../store';
-import { observer } from 'mobx-react';
+import { postsSelector } from '../store/slices/postsSlice';
+// import { useAppSelector } from '../store/hooks'
+import { useSelector } from 'react-redux';
 
-const AllPosts = observer((props: { posts: IPost[] }) => {
-  const { posts: postsFromSSR } = props;
-  const store = getStore();
+const AllPosts = () => {
+  const posts = useSelector(postsSelector);
 
-  const { posts: postsFromStore } = store;
+  // const dispatch = useAppDispatch()
 
   return (
-    <Flex>
-      <Box flex="6">
-        {postsFromSSR && (
-          <UnorderedList mt="6" spacing={5} styleType="none" mb="6">
-            {postsFromSSR.map((post: IPost) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </UnorderedList>
-        )}
-      </Box>
-      <Spacer flex="1" />
-      <Box flex="6">
-        {postsFromStore && (
-          <UnorderedList mt="6" spacing={5} styleType="none" mb="6">
-            {postsFromStore.map((post: IPost) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </UnorderedList>
-        )}
-      </Box>
-    </Flex>
+    <Box>
+      {posts && (
+        <UnorderedList mt="6" spacing={5} styleType="none" mb="6">
+          {posts.map((post: Post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </UnorderedList>
+      )}
+    </Box>
   );
-});
+};
 
 export default AllPosts;

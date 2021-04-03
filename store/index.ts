@@ -1,111 +1,49 @@
-import {
-  Instance,
-  applySnapshot,
-  flow,
-  onSnapshot,
-  types,
-} from 'mobx-state-tree';
-import { Machine, interpret } from 'xstate';
+import postsReducer, { postsInitialState } from './slices/postsSlice';
 
-import Post from './post';
-import { allPosts } from '../graphql/posts/all_posts';
-import { client } from '../services';
-import { machineDefinition } from './state_machine';
+import { configureStore } from '@reduxjs/toolkit';
 import { useMemo } from 'react';
 
-export type IStore = Instance<typeof MyStore>;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
-const MyStore = types
-  .model('MyStore', {
-    posts: types.array(Post),
-    // machineDefinition: types.frozen(MachineConfig<UIContext, UIStateSchema, UIEvents>),
-  })
-  .views((self: any) => ({
-    get state() {
-      return self.ui_state.value;
-    },
-  }))
-  .volatile((self: any) => ({
-    ui_service: undefined,
-    ui_state: undefined,
-    machineDefinition,
-  }))
-  .actions((self: any) => ({
-    getPosts: flow(function* () {
-      console.log('getPosts was called');
+let store: any;
 
-      const { data } = yield client.query({
-        query: allPosts,
-        fetchPolicy: 'network-only',
-      });
-
-      if (data) {
-        self.posts = data.allPosts;
-      }
-    }),
-    showErrorMessage(context: any, event: any) {
-      console.log(event.message);
-    },
-    afterCreate() {
-      const machine = Machine(machineDefinition, {
-        actions: {
-          getPosts: self.getPosts,
-          showErrorMessage: self.showErrorMessage,
-        },
-      });
-      self.ui_service = interpret(machine);
-      self.ui_service.onTransition(self.updateState);
-      self.ui_service.start();
-    },
-    updateState() {
-      self.ui_state = self.ui_service.state;
-    },
-    send(val: any) {
-      self.ui_service.send(val);
-    },
-  }));
-
-let startupValues = {
-  posts: [],
-  machineDefinition,
+const initialState = {
+  posts: postsInitialState,
 };
 
-if (process.browser) {
-  const data = localStorage.getItem('rootState');
-  if (data) {
-    const json = JSON.parse(data);
-    if (MyStore.is(json)) {
-      startupValues = json as any;
-    }
-  }
+function initStore(preloadedState: RootState = initialState) {
+  return configureStore({
+    reducer: {
+      posts: postsReducer,
+    },
+    preloadedState,
+  });
 }
 
-let store: IStore | undefined;
+export const initializeStore = (preloadedState: RootState = initialState) => {
+  let _store = store ?? initStore(preloadedState);
 
-export function initializeStore(snapshot = null) {
-  const _store = store ?? MyStore.create(startupValues);
-
-  onSnapshot(_store, (snapshot) => {
-    if (process.browser) {
-      localStorage.setItem('rootState', JSON.stringify(snapshot));
-    }
-  });
-
-  if (snapshot) {
-    applySnapshot(_store, snapshot);
+  // After navigating to a page with an initial Redux state, merge that state
+  // with the current state in the store, and create a new store
+  if (preloadedState && store) {
+    _store = initStore({
+      ...store.getState(),
+      ...preloadedState,
+    });
+    // Reset the current store
+    store = undefined;
   }
-  if (typeof window === 'undefined') return _store; // always create a new store from server
+
+  // For SSG and SSR always create a new store
+  if (typeof window === 'undefined') return _store;
+  // Create the store once in the client
   if (!store) store = _store;
 
-  return store;
-}
+  return _store;
+};
 
-export function getStore() {
-  return store ? store : initializeStore();
-}
-
-export function useStore(initialState: any) {
+export function useStore(initialState: RootState) {
   const store = useMemo(() => initializeStore(initialState), [initialState]);
-
   return store;
 }

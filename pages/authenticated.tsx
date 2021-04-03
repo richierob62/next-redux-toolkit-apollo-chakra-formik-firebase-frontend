@@ -3,12 +3,14 @@ import { Box, Button, Heading, Text } from '@chakra-ui/react';
 import AllPosts from '../components/AllPosts';
 import { NextPageContext } from 'next';
 import React from 'react';
+import { allPosts } from '../graphql/posts/all_posts';
+import { client } from '../services';
 import firebase from 'firebase/app';
-import firebaseClient from '../firebaseClient';
-import { getSnapshot } from 'mobx-state-tree';
+import firebaseClient from '../auth/firebaseClient';
 import { initializeStore } from '../store';
+import { loadPosts } from '../store/slices/postsSlice';
 import nookies from 'nookies';
-import { verifyIdToken } from '../firebaseAdmin';
+import { verifyIdToken } from '../auth/firebaseAdmin';
 
 const Authenticated = (props: any) => {
   firebaseClient();
@@ -18,7 +20,7 @@ const Authenticated = (props: any) => {
       <Heading as="h2" size="lg" width="100%" textAlign="center">
         All Posts
       </Heading>
-      <AllPosts posts={props.posts} />
+      <AllPosts />
 
       <Button
         w="100%"
@@ -41,13 +43,22 @@ export async function getServerSideProps(context: Partial<NextPageContext>) {
   try {
     const cookies = nookies.get(context);
     const token = await verifyIdToken(cookies.token);
-    const store = initializeStore();
-    await store.getPosts();
+
+    // get store & dispatch
+    const reduxStore = initializeStore();
+    const { dispatch } = reduxStore;
+
+    const { data } = await client.query({
+      query: allPosts,
+      fetchPolicy: 'network-only',
+    });
+
+    dispatch(loadPosts(data.allPosts));
 
     return {
       props: {
         ...token,
-        ...getSnapshot(store),
+        initialReduxState: reduxStore.getState(),
       },
     };
   } catch (err) {

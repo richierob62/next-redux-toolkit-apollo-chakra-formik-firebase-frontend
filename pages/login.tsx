@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import FacebookSignInButton from '../components/FacebookSignInButton';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import firebase from 'firebase/app';
-import firebaseClient from '../firebaseClient';
+import firebaseClient from '../auth/firebaseClient';
 
 const Login = () => {
   firebaseClient();
