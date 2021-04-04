@@ -9,7 +9,7 @@ export type CheckboxControlProps = BaseProps & {
   children: ReactNode;
 };
 
-export const CheckboxControl: FC<CheckboxControlProps> = (
+const CheckboxControl: FC<CheckboxControlProps> = (
   props: CheckboxControlProps
 ) => {
   const { name, label, children, checkBoxProps, ...rest } = props;
@@ -31,3 +31,5 @@ export const CheckboxControl: FC<CheckboxControlProps> = (
     </FormControl>
   );
 };
+
+export default CheckboxControl;

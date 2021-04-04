@@ -1,15 +1,18 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 
-import { Box, Button, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex, HStack, Radio } from '@chakra-ui/react';
 
 import CheckboxChildControl from './form_parts/CheckboxChildControl';
-import { CheckboxControl } from './form_parts/CheckboxControl';
+import CheckboxControl from './form_parts/CheckboxControl';
 import CheckboxGroupControl from './form_parts/CheckboxGroupControl';
 import { Formik } from 'formik';
 import InputControl from './form_parts/InputControl';
 import NumberInputControl from './form_parts/NumberInputControl';
-import PercentComplete from './form_parts/PercentComplete';
+import PercentComplete from './form_parts/PercentCompleteControl';
+import PinInputControl from './form_parts/PinInputControl';
+import RadioGroupControl from './form_parts/RadioGroupControl';
+import ResetButtonControl from './form_parts/ResetButtonControl';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -23,8 +26,10 @@ const initialValues = {
   firstName: '',
   lastName: '',
   employed: false,
-  toppings: ['cheese'],
+  toppings: [],
   age: 0,
+  pin: '',
+  favoriteColor: '',
 };
 
 const validationSchema = Yup.object({
@@ -35,6 +40,10 @@ const validationSchema = Yup.object({
   age: Yup.number()
     .required('You must enter your age')
     .min(18, 'You have to be 18 or older'),
+  pin: Yup.string()
+    .length(4, 'enter all 4 digits')
+    .required('Your PIN is required'),
+  favoriteColor: Yup.string().required('choose a color'),
 });
 
 const TestForm = () => {
@@ -96,11 +105,29 @@ const TestForm = () => {
             helperText="Your actual age!"
           />
 
+          <PinInputControl
+            name="pin"
+            pinAmount={4}
+            pinInputProps={{ size: 'sm' }}
+          />
+
+          <RadioGroupControl name="favoriteColor" label="Favorite Color">
+            <Radio value="#ff0000">Red</Radio>
+            <Radio value="#00ff00">Green</Radio>
+            <Radio value="#0000ff">Blue</Radio>
+          </RadioGroupControl>
+
           <PercentComplete />
 
-          <Button mt={4} type="submit" colorScheme="teal">
-            Submit
-          </Button>
+          <HStack>
+            <ResetButtonControl flex="1" colorScheme="red">
+              Reset
+            </ResetButtonControl>
+
+            <Button flex="1" mt={4} type="submit" colorScheme="teal">
+              Submit
+            </Button>
+          </HStack>
 
           <Box as="pre" marginY={10}>
             {JSON.stringify(values, null, 2)}

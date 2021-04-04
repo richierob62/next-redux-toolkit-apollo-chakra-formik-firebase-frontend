@@ -30,8 +30,8 @@ export const PercentComplete: FC<PercentCompleteProps> = (
   return (
     <Box marginY={5} {...rest}>
       <Progress
-        height={5}
         hasStripe
+        colorScheme="teal"
         isAnimated
         value={progressFn(numFields, numErrors)}
         {...progressProps}
