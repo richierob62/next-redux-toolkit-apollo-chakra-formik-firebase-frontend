@@ -1,3 +1,5 @@
+import '../styles/styles.css';
+
 import { CSSReset, ChakraProvider } from '@chakra-ui/react';
 
 import { AuthProvider } from '../auth/auth';

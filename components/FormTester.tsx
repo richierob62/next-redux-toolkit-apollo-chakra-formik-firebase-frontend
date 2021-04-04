@@ -3,9 +3,13 @@ import * as Yup from 'yup';
 
 import { Box, Button, Flex } from '@chakra-ui/react';
 
+import CheckboxChildControl from './form_parts/CheckboxChildControl';
 import { CheckboxControl } from './form_parts/CheckboxControl';
+import CheckboxGroupControl from './form_parts/CheckboxGroupControl';
 import { Formik } from 'formik';
 import InputControl from './form_parts/InputControl';
+import NumberInputControl from './form_parts/NumberInputControl';
+import PercentComplete from './form_parts/PercentComplete';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -19,11 +23,18 @@ const initialValues = {
   firstName: '',
   lastName: '',
   employed: false,
+  toppings: ['cheese'],
+  age: 0,
 };
+
 const validationSchema = Yup.object({
   firstName: Yup.string().required('First Name is required'),
   lastName: Yup.string().required('Last Name is required'),
   employed: Yup.boolean().equals([true], 'You must be employed'),
+  toppings: Yup.array().min(1, 'Select at least 1 topping'),
+  age: Yup.number()
+    .required('You must enter your age')
+    .min(18, 'You have to be 18 or older'),
 });
 
 const TestForm = () => {
@@ -57,6 +68,35 @@ const TestForm = () => {
           />
 
           <CheckboxControl name="employed">Employed</CheckboxControl>
+
+          <CheckboxGroupControl name="toppings" label="Toppings">
+            <CheckboxChildControl name="toppings" value="chicken">
+              Chicken
+            </CheckboxChildControl>
+            <CheckboxChildControl name="toppings" value="ham">
+              Ham
+            </CheckboxChildControl>
+            <CheckboxChildControl name="toppings" value="mushrooms">
+              Mushrooms
+            </CheckboxChildControl>
+            <CheckboxChildControl name="toppings" value="cheese">
+              Cheese
+            </CheckboxChildControl>
+            <CheckboxChildControl name="toppings" value="tuna">
+              Tuna
+            </CheckboxChildControl>
+            <CheckboxChildControl name="toppings" value="pineapple">
+              Pineapple
+            </CheckboxChildControl>
+          </CheckboxGroupControl>
+
+          <NumberInputControl
+            name="age"
+            label="Age"
+            helperText="Your actual age!"
+          />
+
+          <PercentComplete />
 
           <Button mt={4} type="submit" colorScheme="teal">
             Submit
