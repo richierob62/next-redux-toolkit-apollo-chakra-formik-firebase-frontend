@@ -1,11 +1,12 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 
-import { Box, Button, Flex, HStack, Radio } from '@chakra-ui/react';
+import { Box, Flex, HStack, Radio } from '@chakra-ui/react';
 
 import CheckboxChildControl from './form_parts/CheckboxChildControl';
 import CheckboxControl from './form_parts/CheckboxControl';
 import CheckboxGroupControl from './form_parts/CheckboxGroupControl';
+import DatePickerControl from './form_parts/DatePickerControl';
 import { Formik } from 'formik';
 import InputControl from './form_parts/InputControl';
 import NumberInputControl from './form_parts/NumberInputControl';
@@ -13,6 +14,11 @@ import PercentComplete from './form_parts/PercentCompleteControl';
 import PinInputControl from './form_parts/PinInputControl';
 import RadioGroupControl from './form_parts/RadioGroupControl';
 import ResetButtonControl from './form_parts/ResetButtonControl';
+import SelectControl from './form_parts/SelectControl';
+import SliderControl from './form_parts/SliderControl';
+import SubmitButton from './form_parts/SubmitButtonControl';
+import SwitchControl from './form_parts/SwitchControl';
+import TextareaControl from './form_parts/TextAreaControl';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -30,6 +36,10 @@ const initialValues = {
   age: 0,
   pin: '',
   favoriteColor: '',
+  framework: '',
+  love: 50,
+  married: false,
+  notes: '',
 };
 
 const validationSchema = Yup.object({
@@ -44,6 +54,10 @@ const validationSchema = Yup.object({
     .length(4, 'enter all 4 digits')
     .required('Your PIN is required'),
   favoriteColor: Yup.string().required('choose a color'),
+  framework: Yup.string().required('Please select a framework'),
+  love: Yup.number().max(100).min(0),
+  married: Yup.boolean().equals([true], 'You must be married'),
+  notes: Yup.string().required('Tell us something, please'),
 });
 
 const TestForm = () => {
@@ -59,7 +73,7 @@ const TestForm = () => {
           borderWidth="1px"
           rounded="lg"
           shadow="1px 1px 3px rgba(0,0,0,0.3)"
-          maxWidth={800}
+          maxWidth={500}
           p={6}
           m="10px auto"
           as="form"
@@ -69,11 +83,13 @@ const TestForm = () => {
             name="firstName"
             label="First Name"
             helperText="Enter your first name here"
+            inputProps={{ size: 'sm' }}
           />
           <InputControl
             name="lastName"
             label="Last Name"
             helperText="Enter your last name here"
+            inputProps={{ size: 'sm' }}
           />
 
           <CheckboxControl name="employed">Employed</CheckboxControl>
@@ -103,6 +119,9 @@ const TestForm = () => {
             name="age"
             label="Age"
             helperText="Your actual age!"
+            numberInputProps={{
+              width: '100px',
+            }}
           />
 
           <PinInputControl
@@ -117,6 +136,39 @@ const TestForm = () => {
             <Radio value="#0000ff">Blue</Radio>
           </RadioGroupControl>
 
+          <SelectControl
+            label="Select an Framework"
+            name="framework"
+            selectProps={{ placeholder: 'Select option', width: '50%' }}
+          >
+            <option value="react">React</option>
+            <option value="angular">Angular</option>
+            <option value="vue">Vue</option>
+          </SelectControl>
+
+          <SliderControl
+            name="love"
+            label="How much do you love React?"
+            sliderProps={{ min: 0, max: 100 }}
+            sliderTrackProps={{ height: 1 }}
+            sliderThumbProps={{
+              top: '45%',
+              width: '20px',
+              height: '20px',
+              borderColor: 'teal.500',
+            }}
+          />
+
+          <SwitchControl
+            name="married"
+            label="Married"
+            switchProps={{ colorScheme: 'teal' }}
+          />
+
+          <TextareaControl name="notes" label="Tell us about yourself" />
+
+          <DatePickerControl name="foo" />
+
           <PercentComplete />
 
           <HStack>
@@ -124,9 +176,9 @@ const TestForm = () => {
               Reset
             </ResetButtonControl>
 
-            <Button flex="1" mt={4} type="submit" colorScheme="teal">
+            <SubmitButton flex="1" colorScheme="teal">
               Submit
-            </Button>
+            </SubmitButton>
           </HStack>
 
           <Box as="pre" marginY={10}>
