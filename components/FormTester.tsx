@@ -6,7 +6,8 @@ import { Box, Flex, HStack, Radio } from '@chakra-ui/react';
 import CheckboxChildControl from './form_parts/CheckboxChildControl';
 import CheckboxControl from './form_parts/CheckboxControl';
 import CheckboxGroupControl from './form_parts/CheckboxGroupControl';
-import DatePickerControl from './form_parts/DatePickerControl';
+import DatePickerCalendarControl from './form_parts/DatePickerCalendarControl';
+import DatePickerInputControl from './form_parts/DatePickerInputControl';
 import { Formik } from 'formik';
 import InputControl from './form_parts/InputControl';
 import NumberInputControl from './form_parts/NumberInputControl';
@@ -40,6 +41,8 @@ const initialValues = {
   love: 50,
   married: false,
   notes: '',
+  foo: '',
+  bar: '',
 };
 
 const validationSchema = Yup.object({
@@ -58,6 +61,8 @@ const validationSchema = Yup.object({
   love: Yup.number().max(100).min(0),
   married: Yup.boolean().equals([true], 'You must be married'),
   notes: Yup.string().required('Tell us something, please'),
+  foo: Yup.date().required('Select foo date'),
+  bar: Yup.date().required('Select bar date'),
 });
 
 const TestForm = () => {
@@ -167,7 +172,23 @@ const TestForm = () => {
 
           <TextareaControl name="notes" label="Tell us about yourself" />
 
-          <DatePickerControl name="foo" />
+          <DatePickerCalendarControl
+            name="foo"
+            label="Foo Label"
+            disabledDays={{ daysOfWeek: [0] }}
+            // month={new Date('05-01-2021')}
+            modifiers={{
+              highlighted: new Date('4-30-2021'),
+            }}
+          />
+
+          <DatePickerInputControl
+            name="bar"
+            label="Bar Label"
+            month={new Date('12-1-2021')}
+            showWeekNumbers={true}
+            todayButton="Today"
+          />
 
           <PercentComplete />
 
