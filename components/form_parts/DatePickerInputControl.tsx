@@ -3,16 +3,15 @@ import 'moment/locale/it';
 
 import { BaseProps, FormControl } from '.';
 import DayPicker, { Modifiers } from 'react-day-picker';
-import MomentLocaleUtils, {
-  formatDate,
-  parseDate,
-} from 'react-day-picker/moment';
 import React, { FC } from 'react';
 
 import { Box } from '@chakra-ui/react';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
+import MomentStuff from 'react-day-picker/moment';
 import { css } from '@emotion/react';
 import { useField } from 'formik';
+
+const { formatDate, parseDate } = MomentStuff;
 
 export type DatePickerInputControlProps = BaseProps & {
   disabledDays?: { daysOfWeek: number[] };
@@ -35,7 +34,7 @@ export const DatePickerInputControl: FC<DatePickerInputControlProps> = (
     todayButton,
     ...rest
   } = props;
-  const [field, , { setValue }] = useField(name);
+  const [, , { setValue }] = useField(name);
 
   const dayPickerProps: any = {};
   if (month) dayPickerProps.month = month;
@@ -88,13 +87,6 @@ export const DatePickerInputControl: FC<DatePickerInputControlProps> = (
           parseDate={parseDate}
           placeholder={`${formatDate(new Date())}`}
         />
-        {/* <DayPicker
-          modifiers={modifiers}
-          onDayClick={handleChange}
-          selectedDays={field.value}
-          disabledDays={disabledDays}
-          month={month || new Date()}
-        /> */}
       </FormControl>
     </Box>
   );
