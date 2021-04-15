@@ -3,12 +3,10 @@ import { Box, Button, Heading, Text } from '@chakra-ui/react';
 import AllPosts from '../components/AllPosts';
 import { NextPageContext } from 'next';
 import React from 'react';
-import { allPosts } from '../graphql/posts/all_posts';
-import { client } from '../services';
+import { fetchPosts } from '../store/slices/postsSlice';
 import firebase from 'firebase/app';
 import firebaseClient from '../auth/firebaseClient';
 import { initializeStore } from '../store';
-import { loadPosts } from '../store/slices/postsSlice';
 import nookies from 'nookies';
 import { verifyIdToken } from '../auth/firebaseAdmin';
 
@@ -48,12 +46,7 @@ export async function getServerSideProps(context: Partial<NextPageContext>) {
     const reduxStore = initializeStore();
     const { dispatch } = reduxStore;
 
-    const { data } = await client.query({
-      query: allPosts,
-      fetchPolicy: 'network-only',
-    });
-
-    dispatch(loadPosts(data.allPosts));
+    await dispatch(fetchPosts());
 
     return {
       props: {

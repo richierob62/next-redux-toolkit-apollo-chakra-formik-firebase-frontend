@@ -4,13 +4,11 @@ import FormTester from './FormTester';
 import { Post } from '../generated/apolloComponents';
 import PostCard from './PostCard';
 import React from 'react';
-import { postsSelector } from '../store/slices/postsSlice';
+import { selectPosts } from '../store/slices/postsSlice';
 import { useSelector } from 'react-redux';
 
 const AllPosts = () => {
-  const posts = useSelector(postsSelector);
-
-  // const dispatch = useAppDispatch()
+  const posts = useSelector(selectPosts);
 
   return (
     <Box>

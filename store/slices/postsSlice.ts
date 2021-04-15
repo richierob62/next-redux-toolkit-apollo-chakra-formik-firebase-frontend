@@ -1,26 +1,52 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Dispatch, PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { Post } from '../../generated/apolloComponents';
 import { RootState } from '../../store';
+import { allPosts } from '../../graphql/posts/all_posts';
+import { client } from '../../services';
 
 interface PostState {
   posts: Post[];
+  loading: boolean;
 }
 
-export const postsInitialState: PostState = { posts: [] };
+export const postsInitialState: PostState = { posts: [], loading: false };
 
 const postsSlice = createSlice({
   name: 'posts',
   initialState: postsInitialState,
   reducers: {
-    loadPosts: (state, action: PayloadAction<Post[]>) => {
+    postsStartLoad: (state) => {
+      state.loading = true;
+    },
+    postsLoadSuccess: (state, action: PayloadAction<Post[]>) => {
       state.posts = action.payload;
+      state.loading = false;
     },
   },
 });
 
-export const { loadPosts } = postsSlice.actions;
+// thunk action creators
+export const fetchPosts = () => {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
+    const state = getState();
 
-export const postsSelector = (state: RootState) => state.posts.posts;
+    if (isLoadingPosts(state)) return;
+
+    dispatch(postsStartLoad());
+
+    const { data } = await client.query({
+      query: allPosts,
+      fetchPolicy: 'network-only',
+    });
+
+    dispatch(postsLoadSuccess(data.allPosts));
+  };
+};
+
+export const { postsLoadSuccess, postsStartLoad } = postsSlice.actions;
+
+export const selectPosts = (state: RootState) => state.posts.posts;
+export const isLoadingPosts = (state: RootState) => state.posts.loading;
 
 export default postsSlice.reducer;
