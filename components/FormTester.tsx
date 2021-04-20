@@ -10,6 +10,7 @@ import DatePickerCalendarControl from './form_parts/DatePickerCalendarControl';
 import DatePickerInputControl from './form_parts/DatePickerInputControl';
 import { Formik } from 'formik';
 import InputControl from './form_parts/InputControl';
+import MultipleFileUploadControl from './form_parts/MultipleFileUploadControl';
 import NumberInputControl from './form_parts/NumberInputControl';
 import PercentComplete from './form_parts/PercentCompleteControl';
 import PinInputControl from './form_parts/PinInputControl';
@@ -43,6 +44,7 @@ const initialValues = {
   notes: '',
   foo: '',
   bar: '',
+  image_urls: [],
 };
 
 const validationSchema = Yup.object({
@@ -63,6 +65,11 @@ const validationSchema = Yup.object({
   notes: Yup.string().required('Tell us something, please'),
   foo: Yup.date().required('Select foo date'),
   bar: Yup.date().required('Select bar date'),
+  image_urls: Yup.array(
+    Yup.object({
+      url: Yup.string().required(),
+    })
+  ),
 });
 
 const TestForm = () => {
@@ -189,6 +196,8 @@ const TestForm = () => {
             showWeekNumbers={true}
             todayButton="Today"
           />
+
+          <MultipleFileUploadControl name="image_urls" />
 
           <PercentComplete />
 
